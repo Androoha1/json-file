@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace RectorIntegrationTool\Libraries\Files\Json;
+namespace Posternak\JsonFile;
 
 class Json {
     public static function decodeFile(string $filePath): array {
