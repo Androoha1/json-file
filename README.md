@@ -1,5 +1,10 @@
 # json-file
 
+[![CI](https://github.com/Androoha1/json-file/actions/workflows/ci.yml/badge.svg)](https://github.com/Androoha1/json-file/actions/workflows/ci.yml)
+[![Latest Version](https://img.shields.io/packagist/v/posternak/json-file.svg)](https://packagist.org/packages/posternak/json-file)
+[![PHP Version](https://img.shields.io/packagist/php-v/posternak/json-file.svg)](https://packagist.org/packages/posternak/json-file)
+[![License](https://img.shields.io/packagist/l/posternak/json-file.svg)](LICENSE)
+
 A small PHP utility library for ergonomically reading, mutating, and writing JSON files.
 
 ## Requirements
