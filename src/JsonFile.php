@@ -20,6 +20,13 @@ class JsonFile {
         return $this->filePath;
     }
 
+    /**
+     * @return array<array-key, mixed>
+     */
+    public function all(): array {
+        return $this->fileDecoded;
+    }
+
     public function has(string $path): bool {
         $current = $this->fileDecoded;
 

@@ -42,6 +42,15 @@ class JsonFileTest extends TestCase {
     }
 
     #[Test]
+    public function returnsEntireDecodedContents(): void {
+        $instance = new JsonFile(self::SOURCE_FILE);
+        $this->assertSame(
+            ['key1' => 'value1', 'key2' => 'value2', 'key3' => ['key4' => 'value4', 'key5' => 'value5']],
+            $instance->all(),
+        );
+    }
+
+    #[Test]
     public function exposesFilePath(): void {
         $instance = new JsonFile(self::SOURCE_FILE);
         $this->assertSame(self::SOURCE_FILE, $instance->getFilePath());
