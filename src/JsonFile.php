@@ -75,9 +75,8 @@ class JsonFile {
      * @return array{0: array<array-key, mixed>, 1: string}
      */
     private function navigateToPath(string|array $path, bool $createNonExistingPath = false): array {
-        $keys = self::splitPath($path);
+        ['keys' => $keys, 'display' => $display] = self::parsePath($path);
         $lastKey = array_pop($keys);
-        $display = self::pathToString($path);
 
         if ($lastKey === null) {
             throw new RuntimeException("Path is empty");
@@ -107,17 +106,12 @@ class JsonFile {
 
     /**
      * @param string|list<string> $path
-     * @return list<string>
+     * @return array{keys: list<string>, display: string}
      */
-    private static function splitPath(string|array $path): array {
-        return is_array($path) ? $path : explode('.', $path);
-    }
-
-    /**
-     * @param string|list<string> $path
-     */
-    private static function pathToString(string|array $path): string {
-        return is_array($path) ? implode('.', $path) : $path;
+    private static function parsePath(string|array $path): array {
+        return is_array($path)
+            ? ['keys' => $path, 'display' => implode('.', $path)]
+            : ['keys' => explode('.', $path), 'display' => $path];
     }
 
     public function save(): void {
