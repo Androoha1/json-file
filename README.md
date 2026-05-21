@@ -44,28 +44,28 @@ use Posternak\JsonFile\JsonFile;
 $file = new JsonFile('/path/to/settings.json');
 
 // Read — any JSON type comes back as-is
-$name      = $file->getValueByPath('appName');              // "Acme"
-$port      = $file->getValueByPath('server.port');          // 8080
-$tlsOn     = $file->getValueByPath('server.tls.enabled');   // false
-$flags     = $file->getValueByPath('features.betaFlags');   // ["search-v2", "fast-export"]
-$tlsBlock  = $file->getValueByPath('server.tls');           // ["enabled" => false]
+$name      = $file->get('appName');              // "Acme"
+$port      = $file->get('server.port');          // 8080
+$tlsOn     = $file->get('server.tls.enabled');   // false
+$flags     = $file->get('features.betaFlags');   // ["search-v2", "fast-export"]
+$tlsBlock  = $file->get('server.tls');           // ["enabled" => false]
 
 // Write — strings, ints, bools, arrays, null, all fine
-$file->setValueByPath('version', '0.5.0');
-$file->setValueByPath('server.port', 9090);
-$file->setValueByPath('server.tls.enabled', true);
+$file->set('version', '0.5.0');
+$file->set('server.port', 9090);
+$file->set('server.tls.enabled', true);
 
 // Create nested paths on the fly
-$file->setValueByPath('server.tls.certPath', '/etc/ssl/acme.pem', createNonExistingPath: true);
+$file->set('server.tls.certPath', '/etc/ssl/acme.pem', createNonExistingPath: true);
 
 // Remove
-$file->removeByPath('features.darkMode');
+$file->remove('features.darkMode');
 
 // Persist back to disk (pretty-printed)
 $file->save();
 ```
 
-Missing paths throw `RuntimeException` on read and write (unless `createNonExistingPath: true` is passed to `setValueByPath`). `removeByPath` is a no-op when the path is missing.
+Missing paths throw `RuntimeException` on read and write (unless `createNonExistingPath: true` is passed to `set`). `remove` is a no-op when the path is missing.
 
 ### `Json` — stateless helpers
 

@@ -16,17 +16,17 @@ class JsonFile {
         $this->fileDecoded = $decoded;
     }
 
-    public function getValueByPath(string $path): mixed {
+    public function get(string $path): mixed {
         [$parent, $key] = $this->navigateToPath($path);
         return $parent[$key];
     }
 
-    public function setValueByPath(string $path, mixed $value, bool $createNonExistingPath = false): void {
+    public function set(string $path, mixed $value, bool $createNonExistingPath = false): void {
         $result = $this->navigateToPath($path, $createNonExistingPath);
         $result[0][$result[1]] = $value;
     }
 
-    public function removeByPath(string $path): void {
+    public function remove(string $path): void {
         try {
             $result = $this->navigateToPath($path, false);
             unset($result[0][$result[1]]);

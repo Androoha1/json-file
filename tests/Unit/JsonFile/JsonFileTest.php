@@ -24,16 +24,16 @@ class JsonFileTest extends TestCase {
     }
 
     #[Test]
-    #[DataProvider('provideForGetsValueByPath')]
-    public function getsValueByPath(string $path, mixed $value): void {
+    #[DataProvider('provideForGetsValue')]
+    public function getsValue(string $path, mixed $value): void {
         $instance = new JsonFile(self::SOURCE_FILE);
-        $this->assertSame($value, $instance->getValueByPath($path));
+        $this->assertSame($value, $instance->get($path));
     }
 
     /**
      * @return array<string, array{0: string, 1: mixed}>
      */
-    public static function provideForGetsValueByPath(): array {
+    public static function provideForGetsValue(): array {
         return [
             'top-level string'  => ['key1', 'value1'],
             'top-level object'  => ['key3', ['key4' => 'value4', 'key5' => 'value5']],
@@ -45,82 +45,82 @@ class JsonFileTest extends TestCase {
     public function throwsWhenGettingMissingPath(): void {
         $instance = new JsonFile(self::SOURCE_FILE);
         $this->expectException(RuntimeException::class);
-        $instance->getValueByPath('does.not.exist');
+        $instance->get('does.not.exist');
     }
 
     #[Test]
     public function throwsWhenTraversingThroughNonArrayKey(): void {
         $instance = new JsonFile(self::SOURCE_FILE);
         $this->expectException(RuntimeException::class);
-        $instance->getValueByPath('key1.something');
+        $instance->get('key1.something');
     }
 
     #[Test]
-    public function setsValueByPath(): void {
+    public function setsValue(): void {
         $instance = new JsonFile($this->scratchFile);
-        $instance->setValueByPath('key1', 'changed');
-        $this->assertSame('changed', $instance->getValueByPath('key1'));
+        $instance->set('key1', 'changed');
+        $this->assertSame('changed', $instance->get('key1'));
     }
 
     #[Test]
-    public function setsNestedValueByPath(): void {
+    public function setsNestedValue(): void {
         $instance = new JsonFile($this->scratchFile);
-        $instance->setValueByPath('key3.key4', 'changed');
-        $this->assertSame('changed', $instance->getValueByPath('key3.key4'));
-        $this->assertSame('value5', $instance->getValueByPath('key3.key5'));
+        $instance->set('key3.key4', 'changed');
+        $this->assertSame('changed', $instance->get('key3.key4'));
+        $this->assertSame('value5', $instance->get('key3.key5'));
     }
 
     #[Test]
     public function setsNonStringValues(): void {
         $instance = new JsonFile($this->scratchFile);
-        $instance->setValueByPath('anInt', 42, true);
-        $instance->setValueByPath('aBool', false, true);
-        $instance->setValueByPath('aNull', null, true);
-        $instance->setValueByPath('aFloat', 1.5, true);
+        $instance->set('anInt', 42, true);
+        $instance->set('aBool', false, true);
+        $instance->set('aNull', null, true);
+        $instance->set('aFloat', 1.5, true);
 
-        $this->assertSame(42, $instance->getValueByPath('anInt'));
-        $this->assertSame(false, $instance->getValueByPath('aBool'));
-        $this->assertNull($instance->getValueByPath('aNull'));
-        $this->assertSame(1.5, $instance->getValueByPath('aFloat'));
+        $this->assertSame(42, $instance->get('anInt'));
+        $this->assertSame(false, $instance->get('aBool'));
+        $this->assertNull($instance->get('aNull'));
+        $this->assertSame(1.5, $instance->get('aFloat'));
     }
 
     #[Test]
     public function throwsWhenSettingMissingPathWithoutCreateFlag(): void {
         $instance = new JsonFile($this->scratchFile);
         $this->expectException(RuntimeException::class);
-        $instance->setValueByPath('new.nested.path', 'x');
+        $instance->set('new.nested.path', 'x');
     }
 
     #[Test]
     public function createsNonExistingPathWhenFlagged(): void {
         $instance = new JsonFile($this->scratchFile);
-        $instance->setValueByPath('new.nested.path', 'x', true);
-        $this->assertSame('x', $instance->getValueByPath('new.nested.path'));
+        $instance->set('new.nested.path', 'x', true);
+        $this->assertSame('x', $instance->get('new.nested.path'));
     }
 
     #[Test]
-    public function removesValueByPath(): void {
+    public function removesValue(): void {
         $instance = new JsonFile($this->scratchFile);
-        $instance->removeByPath('key3.key4');
+        $instance->remove('key3.key4');
 
         $this->expectException(RuntimeException::class);
-        $instance->getValueByPath('key3.key4');
+        $instance->get('key3.key4');
     }
 
     #[Test]
-    public function removeByPathSilentlyIgnoresMissingPath(): void {
+    public function removeSilentlyIgnoresMissingPath(): void {
         $instance = new JsonFile($this->scratchFile);
-        $instance->removeByPath('does.not.exist');
-        $this->assertSame('value1', $instance->getValueByPath('key1'));
+        $instance->remove('does.not.exist');
+        $this->assertSame('value1', $instance->get('key1'));
     }
 
     #[Test]
     public function savePersistsChangesToDisk(): void {
         $instance = new JsonFile($this->scratchFile);
-        $instance->setValueByPath('key1', 'persisted');
+        $instance->set('key1', 'persisted');
         $instance->save();
 
         $reloaded = new JsonFile($this->scratchFile);
-        $this->assertSame('persisted', $reloaded->getValueByPath('key1'));
+        $this->assertSame('persisted', $reloaded->get('key1'));
     }
 }
