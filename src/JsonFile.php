@@ -27,10 +27,13 @@ class JsonFile {
         return $this->fileDecoded;
     }
 
-    public function has(string $path): bool {
+    /**
+     * @param string|list<string> $path
+     */
+    public function has(string|array $path): bool {
         $current = $this->fileDecoded;
 
-        foreach (explode('.', $path) as $key) {
+        foreach (self::splitPath($path) as $key) {
             if (!is_array($current) || !array_key_exists($key, $current)) {
                 return false;
             }
@@ -40,17 +43,26 @@ class JsonFile {
         return true;
     }
 
-    public function get(string $path): mixed {
+    /**
+     * @param string|list<string> $path
+     */
+    public function get(string|array $path): mixed {
         [$parent, $key] = $this->navigateToPath($path);
         return $parent[$key];
     }
 
-    public function set(string $path, mixed $value, bool $createNonExistingPath = false): void {
+    /**
+     * @param string|list<string> $path
+     */
+    public function set(string|array $path, mixed $value, bool $createNonExistingPath = false): void {
         $result = $this->navigateToPath($path, $createNonExistingPath);
         $result[0][$result[1]] = $value;
     }
 
-    public function remove(string $path): void {
+    /**
+     * @param string|list<string> $path
+     */
+    public function remove(string|array $path): void {
         try {
             $result = $this->navigateToPath($path, false);
             unset($result[0][$result[1]]);
@@ -58,32 +70,53 @@ class JsonFile {
     }
 
     /**
+     * @param string|list<string> $path
      * @return array{0: array<array-key, mixed>, 1: string}
      */
-    private function navigateToPath(string $path, bool $createNonExistingPath = false): array {
-        $keys = explode('.', $path);
+    private function navigateToPath(string|array $path, bool $createNonExistingPath = false): array {
+        $keys = self::splitPath($path);
         $lastKey = array_pop($keys);
+        $display = self::pathToString($path);
+
+        if ($lastKey === null) {
+            throw new RuntimeException("Path is empty");
+        }
 
         $current = &$this->fileDecoded;
 
         foreach ($keys as $key) {
             if (!array_key_exists($key, $current)) {
                 if (!$createNonExistingPath) {
-                    throw new RuntimeException("Path '$path' does not exist");
+                    throw new RuntimeException("Path '$display' does not exist");
                 }
                 $current[$key] = [];
             } elseif (!is_array($current[$key])) {
-                throw new RuntimeException("Cannot traverse path '$path': key '$key' is not an array");
+                throw new RuntimeException("Cannot traverse path '$display': key '$key' is not an array");
             }
 
             $current = &$current[$key];
         }
 
         if (!$createNonExistingPath && !array_key_exists($lastKey, $current)) {
-            throw new RuntimeException("Path '$path' does not exist");
+            throw new RuntimeException("Path '$display' does not exist");
         }
 
         return [&$current, $lastKey];
+    }
+
+    /**
+     * @param string|list<string> $path
+     * @return list<string>
+     */
+    private static function splitPath(string|array $path): array {
+        return is_array($path) ? $path : explode('.', $path);
+    }
+
+    /**
+     * @param string|list<string> $path
+     */
+    private static function pathToString(string|array $path): string {
+        return is_array($path) ? implode('.', $path) : $path;
     }
 
     public function save(): void {

@@ -75,6 +75,19 @@ class JsonFileTest extends TestCase {
     }
 
     #[Test]
+    public function acceptsArrayPathsToAvoidDotAmbiguity(): void {
+        $instance = new JsonFile($this->scratchFile);
+
+        $instance->set(['servers', '127.0.0.1', 'port'], 8080, true);
+
+        $this->assertTrue($instance->has(['servers', '127.0.0.1', 'port']));
+        $this->assertSame(8080, $instance->get(['servers', '127.0.0.1', 'port']));
+
+        $instance->remove(['servers', '127.0.0.1', 'port']);
+        $this->assertFalse($instance->has(['servers', '127.0.0.1', 'port']));
+    }
+
+    #[Test]
     public function throwsWhenGettingMissingPath(): void {
         $instance = new JsonFile(self::SOURCE_FILE);
         $this->expectException(RuntimeException::class);

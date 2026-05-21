@@ -71,6 +71,12 @@ $file->save();
 
 Missing paths throw `RuntimeException` on read and write (unless `createNonExistingPath: true` is passed to `set`). `remove` is a no-op when the path is missing.
 
+If a key itself contains a `.` (e.g. an IP address or a version constraint used as a key), pass the path as a list of strings to skip splitting:
+
+```php
+$file->get(['servers', '127.0.0.1', 'port']);
+```
+
 ### `Json` — stateless helpers
 
 ```php
