@@ -7,13 +7,15 @@ use RuntimeException;
 class JsonFile {
     /** @var array<array-key, mixed> */
     private array $fileDecoded;
+    private int $loadedMtime;
+    private bool $mutated = false;
 
     public function __construct(private readonly string $filePath) {
-        $decoded = Json::decodeFile($this->filePath);
-        if (!is_array($decoded)) {
-            throw new RuntimeException("File '$filePath' does not contain a JSON object at its root");
-        }
-        $this->fileDecoded = $decoded;
+        $this->loadFromDisk();
+    }
+
+    public function reload(): void {
+        $this->loadFromDisk();
     }
 
     public function getFilePath(): string {
@@ -24,6 +26,7 @@ class JsonFile {
      * @return array<array-key, mixed>
      */
     public function all(): array {
+        $this->refreshIfStaleAndUnmutated();
         return $this->fileDecoded;
     }
 
@@ -53,6 +56,7 @@ class JsonFile {
     public function set(string|array $path, mixed $value): void {
         $result = $this->navigateToPath($path, createNonExistingPath: true);
         $result[0][$result[1]] = $value;
+        $this->mutated = true;
     }
 
     /**
@@ -64,6 +68,7 @@ class JsonFile {
         }
         $result = $this->navigateToPath($path);
         unset($result[0][$result[1]]);
+        $this->mutated = true;
     }
 
     /**
@@ -71,6 +76,8 @@ class JsonFile {
      * @return array{0: array<array-key, mixed>, 1: string}
      */
     private function navigateToPath(string|array $path, bool $createNonExistingPath = false): array {
+        $this->refreshIfStaleAndUnmutated();
+
         $keys = self::splitPath($path);
         $lastKey = array_pop($keys);
         $display = self::pathToString($path);
@@ -117,6 +124,40 @@ class JsonFile {
     }
 
     public function save(): void {
+        if (!$this->mutated) {
+            return;
+        }
+        if ($this->currentMtime() !== $this->loadedMtime) {
+            throw new RuntimeException(
+                "Cannot save '{$this->filePath}': it was modified externally since load and there are unsaved in-memory changes. Call reload() to discard local changes and pick up the external state."
+            );
+        }
         Json::prettyPrintIntoFile($this->fileDecoded, $this->filePath);
+        $this->loadedMtime = $this->currentMtime();
+        $this->mutated = false;
+    }
+
+    private function refreshIfStaleAndUnmutated(): void {
+        if ($this->mutated) {
+            return;
+        }
+        if ($this->currentMtime() !== $this->loadedMtime) {
+            $this->loadFromDisk();
+        }
+    }
+
+    private function loadFromDisk(): void {
+        $decoded = Json::decodeFile($this->filePath);
+        if (!is_array($decoded)) {
+            throw new RuntimeException("File '{$this->filePath}' does not contain a JSON object or array at its root");
+        }
+        $this->fileDecoded = $decoded;
+        $this->loadedMtime = $this->currentMtime();
+        $this->mutated = false;
+    }
+
+    private function currentMtime(): int {
+        clearstatcache(true, $this->filePath);
+        return (int) filemtime($this->filePath);
     }
 }
