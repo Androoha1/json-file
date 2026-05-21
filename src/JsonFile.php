@@ -31,16 +31,12 @@ class JsonFile {
      * @param string|list<string> $path
      */
     public function has(string|array $path): bool {
-        $current = $this->fileDecoded;
-
-        foreach (self::splitPath($path) as $key) {
-            if (!is_array($current) || !array_key_exists($key, $current)) {
-                return false;
-            }
-            $current = $current[$key];
+        try {
+            $this->navigateToPath($path);
+            return true;
+        } catch (RuntimeException) {
+            return false;
         }
-
-        return true;
     }
 
     /**
