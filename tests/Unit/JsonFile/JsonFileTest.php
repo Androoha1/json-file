@@ -69,7 +69,7 @@ class JsonFileTest extends TestCase {
     #[Test]
     public function hasReturnsTrueForNullValue(): void {
         $instance = new JsonFile($this->scratchFile);
-        $instance->set('aNull', null, true);
+        $instance->set('aNull', null);
 
         $this->assertTrue($instance->has('aNull'));
     }
@@ -78,7 +78,7 @@ class JsonFileTest extends TestCase {
     public function acceptsArrayPathsToAvoidDotAmbiguity(): void {
         $instance = new JsonFile($this->scratchFile);
 
-        $instance->set(['servers', '127.0.0.1', 'port'], 8080, true);
+        $instance->set(['servers', '127.0.0.1', 'port'], 8080);
 
         $this->assertTrue($instance->has(['servers', '127.0.0.1', 'port']));
         $this->assertSame(8080, $instance->get(['servers', '127.0.0.1', 'port']));
@@ -119,10 +119,10 @@ class JsonFileTest extends TestCase {
     #[Test]
     public function setsNonStringValues(): void {
         $instance = new JsonFile($this->scratchFile);
-        $instance->set('anInt', 42, true);
-        $instance->set('aBool', false, true);
-        $instance->set('aNull', null, true);
-        $instance->set('aFloat', 1.5, true);
+        $instance->set('anInt', 42);
+        $instance->set('aBool', false);
+        $instance->set('aNull', null);
+        $instance->set('aFloat', 1.5);
 
         $this->assertSame(42, $instance->get('anInt'));
         $this->assertSame(false, $instance->get('aBool'));
@@ -131,16 +131,9 @@ class JsonFileTest extends TestCase {
     }
 
     #[Test]
-    public function throwsWhenSettingMissingPathWithoutCreateFlag(): void {
+    public function setCreatesMissingParentsByDefault(): void {
         $instance = new JsonFile($this->scratchFile);
-        $this->expectException(RuntimeException::class);
         $instance->set('new.nested.path', 'x');
-    }
-
-    #[Test]
-    public function createsNonExistingPathWhenFlagged(): void {
-        $instance = new JsonFile($this->scratchFile);
-        $instance->set('new.nested.path', 'x', true);
         $this->assertSame('x', $instance->get('new.nested.path'));
     }
 

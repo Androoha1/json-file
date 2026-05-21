@@ -59,8 +59,8 @@ $file->set('version', '0.5.0');
 $file->set('server.port', 9090);
 $file->set('server.tls.enabled', true);
 
-// Create nested paths on the fly
-$file->set('server.tls.certPath', '/etc/ssl/acme.pem', createNonExistingPath: true);
+// Missing parents are created on the fly
+$file->set('server.tls.certPath', '/etc/ssl/acme.pem');
 
 // Remove
 $file->remove('features.darkMode');
@@ -69,7 +69,7 @@ $file->remove('features.darkMode');
 $file->save();
 ```
 
-Missing paths throw `RuntimeException` on read and write (unless `createNonExistingPath: true` is passed to `set`). `remove` is a no-op when the path is missing.
+Missing paths throw `RuntimeException` on `get`. `set` creates missing parents automatically. `remove` is a no-op when the path is missing.
 
 If a key itself contains a `.` (e.g. an IP address or a version constraint used as a key), pass the path as a list of strings to skip splitting:
 

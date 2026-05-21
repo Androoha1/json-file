@@ -54,8 +54,8 @@ class JsonFile {
     /**
      * @param string|list<string> $path
      */
-    public function set(string|array $path, mixed $value, bool $createNonExistingPath = false): void {
-        $result = $this->navigateToPath($path, $createNonExistingPath);
+    public function set(string|array $path, mixed $value): void {
+        $result = $this->navigateToPath($path, createNonExistingPath: true);
         $result[0][$result[1]] = $value;
     }
 
