@@ -63,10 +63,11 @@ class JsonFile {
      * @param string|list<string> $path
      */
     public function remove(string|array $path): void {
-        try {
-            $result = $this->navigateToPath($path, false);
-            unset($result[0][$result[1]]);
-        } catch (RuntimeException) {}
+        if (!$this->has($path)) {
+            return;
+        }
+        $result = $this->navigateToPath($path);
+        unset($result[0][$result[1]]);
     }
 
     /**
