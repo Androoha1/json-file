@@ -4,6 +4,9 @@ namespace Posternak\JsonFile;
 
 use RuntimeException;
 
+/**
+ * @phpstan-type Path string|list<string>
+ */
 class JsonFile {
     /** @var array<array-key, mixed> */
     private array $fileDecoded;
@@ -30,7 +33,7 @@ class JsonFile {
     }
 
     /**
-     * @param string|list<string> $path
+     * @param Path $path
      */
     public function has(string|array $path): bool {
         try {
@@ -42,7 +45,7 @@ class JsonFile {
     }
 
     /**
-     * @param string|list<string> $path
+     * @param Path $path
      */
     public function get(string|array $path): mixed {
         [$parent, $key] = $this->navigateToPath($path);
@@ -50,7 +53,7 @@ class JsonFile {
     }
 
     /**
-     * @param string|list<string> $path
+     * @param Path $path
      */
     public function set(string|array $path, mixed $value): void {
         $result = $this->navigateToPath($path, createNonExistingPath: true);
@@ -59,7 +62,7 @@ class JsonFile {
     }
 
     /**
-     * @param string|list<string> $path
+     * @param Path $path
      */
     public function remove(string|array $path): void {
         if (!$this->has($path)) {
@@ -71,7 +74,7 @@ class JsonFile {
     }
 
     /**
-     * @param string|list<string> $path
+     * @param Path $path
      * @return array{0: array<array-key, mixed>, 1: string}
      */
     private function navigateToPath(string|array $path, bool $createNonExistingPath = false): array {
@@ -105,7 +108,7 @@ class JsonFile {
     }
 
     /**
-     * @param string|list<string> $path
+     * @param Path $path
      * @return array{keys: list<string>, display: string}
      */
     private static function parsePath(string|array $path): array {
