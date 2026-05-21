@@ -16,6 +16,19 @@ class JsonFile {
         $this->fileDecoded = $decoded;
     }
 
+    public function has(string $path): bool {
+        $current = $this->fileDecoded;
+
+        foreach (explode('.', $path) as $key) {
+            if (!is_array($current) || !array_key_exists($key, $current)) {
+                return false;
+            }
+            $current = $current[$key];
+        }
+
+        return true;
+    }
+
     public function get(string $path): mixed {
         [$parent, $key] = $this->navigateToPath($path);
         return $parent[$key];

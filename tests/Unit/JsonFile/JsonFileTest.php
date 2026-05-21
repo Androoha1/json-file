@@ -42,6 +42,24 @@ class JsonFileTest extends TestCase {
     }
 
     #[Test]
+    public function reportsPathExistence(): void {
+        $instance = new JsonFile(self::SOURCE_FILE);
+
+        $this->assertTrue($instance->has('key1'));
+        $this->assertTrue($instance->has('key3.key4'));
+        $this->assertFalse($instance->has('does.not.exist'));
+        $this->assertFalse($instance->has('key1.something'));
+    }
+
+    #[Test]
+    public function hasReturnsTrueForNullValue(): void {
+        $instance = new JsonFile($this->scratchFile);
+        $instance->set('aNull', null, true);
+
+        $this->assertTrue($instance->has('aNull'));
+    }
+
+    #[Test]
     public function throwsWhenGettingMissingPath(): void {
         $instance = new JsonFile(self::SOURCE_FILE);
         $this->expectException(RuntimeException::class);

@@ -43,6 +43,10 @@ use Posternak\JsonFile\JsonFile;
 
 $file = new JsonFile('/path/to/settings.json');
 
+// Check existence
+$file->has('server.tls.enabled');                           // true
+$file->has('features.nonexistent');                         // false
+
 // Read — any JSON type comes back as-is
 $name      = $file->get('appName');              // "Acme"
 $port      = $file->get('server.port');          // 8080
