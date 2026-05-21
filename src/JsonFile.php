@@ -5,6 +5,7 @@ namespace Posternak\JsonFile;
 use RuntimeException;
 
 class JsonFile {
+    /** @var array<string, mixed> */
     private array $fileDecoded;
 
     public function __construct(private readonly string $filePath) {
@@ -28,6 +29,9 @@ class JsonFile {
         } catch (RuntimeException) {}
     }
 
+    /**
+     * @return array{0: array<string, mixed>, 1: string}
+     */
     private function navigateToPath(string $path, bool $createNonExistingPath = false): array {
         $keys = explode('.', $path);
         $lastKey = array_pop($keys);

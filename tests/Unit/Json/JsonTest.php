@@ -36,6 +36,9 @@ class JsonTest extends TestCase {
         $this->assertFileEquals($readFilePath, $writeFile);
     }
 
+    /**
+     * @return array<int, array{0: string}>
+     */
     public static function provideForPrettyPrintsIntoAFile(): array {
         return [
             [self::$fileWithSomeContent],

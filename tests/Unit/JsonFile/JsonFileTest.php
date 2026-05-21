@@ -30,6 +30,9 @@ class JsonFileTest extends TestCase {
         $this->assertSame($value, $instance->getValueByPath($path));
     }
 
+    /**
+     * @return array<string, array{0: string, 1: mixed}>
+     */
     public static function provideForGetsValueByPath(): array {
         return [
             'top-level string'  => ['key1', 'value1'],
