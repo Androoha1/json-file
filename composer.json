@@ -3,6 +3,10 @@
     "description": "A PHP utility library to ergonomically work with JSON files.",
     "type": "library",
     "license": "MIT",
+    "keywords": ["json", "json-file", "file-manipulation"],
+    "require": {
+        "php": "^8.2"
+    },
     "autoload": {
         "psr-4": {
             "Posternak\\JsonFile\\": "src/"

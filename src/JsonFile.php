@@ -5,45 +5,20 @@ namespace Posternak\JsonFile;
 use RuntimeException;
 
 class JsonFile {
-    private static array $fileInstanceMap = [];
-    private array $fileDecoded = [];
-    private int $lastModifiedTime = 0;
+    private array $fileDecoded;
 
-    protected function __construct(private readonly string $filePath) {
-        $this->reload();
-    }
-
-    private function reload(): void {
+    public function __construct(private readonly string $filePath) {
         $this->fileDecoded = Json::decodeFile($this->filePath);
-        $this->lastModifiedTime = (int) filemtime($this->filePath);
     }
 
-    private function refreshIfStale(): void {
-        if ((int) filemtime($this->filePath) !== $this->lastModifiedTime) {
-            $this->reload();
-        }
-    }
-
-    private function &decoded(): array {
-        $this->refreshIfStale();
-        return $this->fileDecoded;
-    }
-
-    public static function getInstance(string $filePath): self {
-        $filePath = realpath($filePath);
-
-        return self::$fileInstanceMap[$filePath]
-            ?? self::$fileInstanceMap[$filePath] = new self($filePath);
-    }
-
-    public function getValueByPath(string $path): string|array {
+    public function getValueByPath(string $path): mixed {
         [$parent, $key] = $this->navigateToPath($path);
         return $parent[$key];
     }
 
-    public function setValueByPath(string $path, string $value, bool $createNonExistingPath = false): void {
+    public function setValueByPath(string $path, mixed $value, bool $createNonExistingPath = false): void {
         $result = $this->navigateToPath($path, $createNonExistingPath);
-        $result[0][$result[1]] = $value;  // Directly use the reference
+        $result[0][$result[1]] = $value;
     }
 
     public function removeByPath(string $path): void {
@@ -57,10 +32,10 @@ class JsonFile {
         $keys = explode('.', $path);
         $lastKey = array_pop($keys);
 
-        $current = &$this->decoded();
+        $current = &$this->fileDecoded;
 
         foreach ($keys as $key) {
-            if (!isset($current[$key])) {
+            if (!array_key_exists($key, $current)) {
                 if (!$createNonExistingPath) {
                     throw new RuntimeException("Path '$path' does not exist");
                 }
@@ -72,7 +47,7 @@ class JsonFile {
             $current = &$current[$key];
         }
 
-        if (!$createNonExistingPath && !isset($current[$lastKey])) {
+        if (!$createNonExistingPath && !array_key_exists($lastKey, $current)) {
             throw new RuntimeException("Path '$path' does not exist");
         }
 
@@ -80,7 +55,6 @@ class JsonFile {
     }
 
     public function save(): void {
-        Json::prettyPrintIntoFile($this->decoded(), $this->filePath);
-        $this->lastModifiedTime = (int) filemtime($this->filePath);
+        Json::prettyPrintIntoFile($this->fileDecoded, $this->filePath);
     }
 }
