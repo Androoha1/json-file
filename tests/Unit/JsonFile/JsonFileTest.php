@@ -42,6 +42,12 @@ class JsonFileTest extends TestCase {
     }
 
     #[Test]
+    public function exposesFilePath(): void {
+        $instance = new JsonFile(self::SOURCE_FILE);
+        $this->assertSame(self::SOURCE_FILE, $instance->getFilePath());
+    }
+
+    #[Test]
     public function reportsPathExistence(): void {
         $instance = new JsonFile(self::SOURCE_FILE);
 

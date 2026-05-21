@@ -16,6 +16,10 @@ class JsonFile {
         $this->fileDecoded = $decoded;
     }
 
+    public function getFilePath(): string {
+        return $this->filePath;
+    }
+
     public function has(string $path): bool {
         $current = $this->fileDecoded;
 
