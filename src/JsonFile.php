@@ -26,8 +26,7 @@ class JsonFile {
      * @return array<array-key, mixed>
      */
     public function all(): array {
-        $this->refreshIfStaleAndUnmutated();
-        return $this->fileDecoded;
+        return $this->decoded();
     }
 
     /**
@@ -76,8 +75,6 @@ class JsonFile {
      * @return array{0: array<array-key, mixed>, 1: string}
      */
     private function navigateToPath(string|array $path, bool $createNonExistingPath = false): array {
-        $this->refreshIfStaleAndUnmutated();
-
         $keys = self::splitPath($path);
         $lastKey = array_pop($keys);
         $display = self::pathToString($path);
@@ -86,7 +83,7 @@ class JsonFile {
             throw new RuntimeException("Path is empty");
         }
 
-        $current = &$this->fileDecoded;
+        $current = &$this->decoded();
 
         foreach ($keys as $key) {
             if (!array_key_exists($key, $current)) {
@@ -137,13 +134,17 @@ class JsonFile {
         $this->mutated = false;
     }
 
-    private function refreshIfStaleAndUnmutated(): void {
-        if ($this->mutated) {
-            return;
-        }
-        if ($this->currentMtime() !== $this->loadedMtime) {
+    /**
+     * Single access point for the in-memory content.
+     * Auto-refreshes from disk when the file has changed externally and there are no pending mutations.
+     *
+     * @return array<array-key, mixed>
+     */
+    private function &decoded(): array {
+        if (!$this->mutated && $this->currentMtime() !== $this->loadedMtime) {
             $this->loadFromDisk();
         }
+        return $this->fileDecoded;
     }
 
     private function loadFromDisk(): void {
