@@ -5,11 +5,15 @@ namespace Posternak\JsonFile;
 use RuntimeException;
 
 class JsonFile {
-    /** @var array<string, mixed> */
+    /** @var array<array-key, mixed> */
     private array $fileDecoded;
 
     public function __construct(private readonly string $filePath) {
-        $this->fileDecoded = Json::decodeFile($this->filePath);
+        $decoded = Json::decodeFile($this->filePath);
+        if (!is_array($decoded)) {
+            throw new RuntimeException("File '$filePath' does not contain a JSON object at its root");
+        }
+        $this->fileDecoded = $decoded;
     }
 
     public function getValueByPath(string $path): mixed {
@@ -30,7 +34,7 @@ class JsonFile {
     }
 
     /**
-     * @return array{0: array<string, mixed>, 1: string}
+     * @return array{0: array<array-key, mixed>, 1: string}
      */
     private function navigateToPath(string $path, bool $createNonExistingPath = false): array {
         $keys = explode('.', $path);
